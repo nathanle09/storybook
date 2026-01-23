@@ -1,4 +1,4 @@
-import { Camera, Film, Gift, Heart, Shield, Sparkles } from "lucide-react";
+import { Camera, Film, Gift, Shield } from "lucide-react";
 
 const features = [
   {
@@ -12,11 +12,6 @@ const features = [
     description: "Add a personal video message that brings your story to life.",
   },
   {
-    icon: Heart,
-    title: "Personalized Touch",
-    description: "Customize every detail to reflect your family's unique journey.",
-  },
-  {
     icon: Gift,
     title: "Perfect Gift",
     description: "The most meaningful present for birthdays, anniversaries, or holidays.",
@@ -25,11 +20,6 @@ const features = [
     icon: Shield,
     title: "Lasting Quality",
     description: "Premium materials designed to be treasured for generations.",
-  },
-  {
-    icon: Sparkles,
-    title: "Easy Creation",
-    description: "Simple upload process makes creating your storybook effortless.",
   },
 ];
 
