@@ -45,12 +45,10 @@ const Arrange = () => {
         firstName: "",
         lastName: "",
         email: "",
-        phone: "",
         address: "",
         city: "",
         state: "",
         zip: "",
-        country: "",
         imageStorageIds: [],
       });
       
