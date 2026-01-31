@@ -10,7 +10,7 @@ export function HeroSection() {
       <div className="absolute inset-0 z-0">
         <img
           src={heroImage}
-          alt="Vintage photo album with family memories"
+          alt="Photo album with family memories"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/40" />
@@ -48,8 +48,8 @@ export function HeroSection() {
             style={{ animationDelay: "0.4s" }}
           >
             <Button variant="hero" size="lg" asChild>
-              <Link to="/shop">
-                Shop Now
+              <Link to="/arrange/signature">
+                Show Now
                 <ArrowRight size={18} />
               </Link>
             </Button>

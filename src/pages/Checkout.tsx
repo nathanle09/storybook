@@ -19,7 +19,6 @@ interface ArrangeData {
   title: string;
   subtitle: string;
   message: string;
-  coverStyle: string;
   productId: string;
   product: { name: string; photos: string; price: number };
 }
@@ -431,10 +430,6 @@ const Checkout = () => {
                         </span>
                       </div>
                     )}
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Cover</span>
-                      <span className="capitalize">{arrangeData.coverStyle}</span>
-                    </div>
                   </div>
 
                   <div className="border-t border-border pt-4 mb-6">

@@ -5,20 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Layout } from "@/components/layout/Layout";
-import { ArrowLeft, ArrowRight, BookOpen, Palette } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 
 const productDetails: Record<string, { name: string; photos: string; price: number }> = {
   essential: { name: "Essential", photos: "24 photos", price: 79 },
   signature: { name: "Signature", photos: "36 photos", price: 129 },
   legacy: { name: "Legacy", photos: "48 photos", price: 199 },
 };
-
-const coverStyles = [
-  { id: "classic", name: "Classic", color: "bg-amber-900" },
-  { id: "modern", name: "Modern", color: "bg-slate-800" },
-  { id: "natural", name: "Natural", color: "bg-stone-600" },
-  { id: "ivory", name: "Ivory", color: "bg-amber-100 border-2 border-border" },
-];
 
 const Arrange = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -29,7 +22,6 @@ const Arrange = () => {
     title: "",
     subtitle: "",
     message: "",
-    coverStyle: "classic",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -120,36 +112,6 @@ const Arrange = () => {
             </div>
 
             {/* Cover Style Section */}
-            <div className="bg-card rounded-xl p-8 shadow-card border border-border/50">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Palette size={20} className="text-primary" />
-                </div>
-                <h2 className="font-serif text-xl font-medium">Cover Style</h2>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {coverStyles.map((style) => (
-                  <button
-                    key={style.id}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, coverStyle: style.id })}
-                    className={`group p-4 rounded-lg border-2 transition-all ${
-                      formData.coverStyle === style.id
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <div
-                      className={`w-full aspect-[3/4] rounded-md mb-3 ${style.color}`}
-                    />
-                    <span className="text-sm font-medium">{style.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Summary */}
             <div className="bg-secondary/50 rounded-xl p-8">
               <div className="flex items-center justify-between mb-4">
                 <span className="font-medium">Your Selection</span>
