@@ -48,8 +48,8 @@ export function HeroSection() {
             style={{ animationDelay: "0.4s" }}
           >
             <Button variant="hero" size="lg" asChild>
-              <Link to="/shop">
-                Shop Now
+              <Link to="/arrange/signature">
+                Show Now
                 <ArrowRight size={18} />
               </Link>
             </Button>
