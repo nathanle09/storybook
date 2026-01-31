@@ -1,5 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,20 +17,15 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-interface ArrangeData {
-  title: string;
-  subtitle: string;
-  message: string;
-  productId: string;
-  product: { name: string; photos: string; price: number };
-}
-
 const Checkout = () => {
   const navigate = useNavigate();
+  const orderId = sessionStorage.getItem("orderId");
   
-  // Get arrange data from session storage
-  const arrangeDataStr = sessionStorage.getItem("arrangeData");
-  const arrangeData: ArrangeData | null = arrangeDataStr ? JSON.parse(arrangeDataStr) : null;
+  // Fetch order from Convex
+  const order = useQuery(api.orders.getOrder, orderId ? { orderId: orderId as any } : "skip");
+  const updateOrderStatus = useMutation(api.orders.updateOrderStatus);
+  const updateOrderWithFiles = useMutation(api.orders.updateOrderWithFiles);
+  const generateUploadUrl = useMutation(api.uploads.generateUploadUrl);
 
   const [images, setImages] = useState<File[]>([]);
   const [video, setVideo] = useState<File | null>(null);
@@ -38,17 +35,30 @@ const Checkout = () => {
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
     address: "",
     city: "",
     state: "",
     zip: "",
-    country: "",
   });
 
-  const maxPhotos = arrangeData?.product?.photos?.includes("48")
+  // Update customer info from order
+  useEffect(() => {
+    if (order) {
+      setCustomerInfo({
+        firstName: order.firstName || "",
+        lastName: order.lastName || "",
+        email: order.email || "",
+        address: order.address || "",
+        city: order.city || "",
+        state: order.state || "",
+        zip: order.zip || "",
+      });
+    }
+  }, [order]);
+
+  const maxPhotos = order?.productPhotos?.includes("48")
     ? 48
-    : arrangeData?.product?.photos?.includes("36")
+    : order?.productPhotos?.includes("36")
     ? 36
     : 24;
 
@@ -88,6 +98,16 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!orderId || !order) {
+      toast({
+        title: "Error",
+        description: "Order not found. Please start again.",
+        variant: "destructive",
+      });
+      navigate("/");
+      return;
+    }
+
     if (images.length < 24) {
       toast({
         title: "Not enough images",
@@ -99,21 +119,128 @@ const Checkout = () => {
 
     setIsSubmitting(true);
     
-    // Simulate order processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    
-    toast({
-      title: "Order Placed Successfully!",
-      description: "Thank you for your order. You'll receive a confirmation email shortly.",
-    });
-    
-    sessionStorage.removeItem("arrangeData");
-    setIsSubmitting(false);
-    navigate("/");
+    try {
+      // Upload images to Convex storage
+      const imageStorageIds: string[] = [];
+      for (const imageFile of images) {
+        try {
+          const uploadUrl = await generateUploadUrl();
+          const response = await fetch(uploadUrl, {
+            method: "POST",
+            headers: { "Content-Type": imageFile.type },
+            body: imageFile,
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Failed to upload image: ${response.statusText}`);
+          }
+          
+          const { storageId } = await response.json();
+          imageStorageIds.push(storageId);
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          toast({
+            title: "Error uploading image",
+            description: `Failed to upload image. Please try again.`,
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Upload video to Convex storage if present
+      let videoStorageId: string | undefined;
+      if (video) {
+        try {
+          const uploadUrl = await generateUploadUrl();
+          const response = await fetch(uploadUrl, {
+            method: "POST",
+            headers: { "Content-Type": video.type },
+            body: video,
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Failed to upload video: ${response.statusText}`);
+          }
+          
+          const { storageId } = await response.json();
+          videoStorageId = storageId;
+        } catch (error) {
+          console.error("Error uploading video:", error);
+          toast({
+            title: "Error uploading video",
+            description: "Failed to upload video. Please try again.",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Update order with storage IDs and customer info
+      await updateOrderWithFiles({
+        orderId: orderId as any,
+        imageStorageIds,
+        videoStorageId,
+        firstName: customerInfo.firstName,
+        lastName: customerInfo.lastName,
+        email: customerInfo.email,
+        address: customerInfo.address,
+        city: customerInfo.city,
+        state: customerInfo.state,
+        zip: customerInfo.zip,
+      });
+
+      // Update order status to processing
+      await updateOrderStatus({
+        orderId: orderId as any,
+        status: "processing",
+      });
+      
+      toast({
+        title: "Order Placed Successfully!",
+        description: "Thank you for your order. You'll receive a confirmation email shortly.",
+      });
+      
+      sessionStorage.removeItem("orderId");
+      setIsSubmitting(false);
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to process order:", error);
+      toast({
+        title: "Error",
+        description: "Failed to process order. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+    }
   };
 
-  if (!arrangeData) {
-    navigate("/shop");
+  if (!orderId) {
+    navigate("/");
+    return null;
+  }
+
+  // Show loading state while order is being fetched
+  if (order === undefined) {
+    return (
+      <Layout>
+        <section className="section-padding">
+          <div className="max-w-5xl mx-auto px-6">
+            <div className="text-center">
+              <Loader2 size={40} className="animate-spin mx-auto mb-4" />
+              <p className="text-muted-foreground">Loading your order...</p>
+            </div>
+          </div>
+        </section>
+      </Layout>
+    );
+  }
+
+  // If order doesn't exist in the database, redirect home
+  if (order === null) {
+    navigate("/");
     return null;
   }
 
@@ -306,19 +433,6 @@ const Checkout = () => {
                     <div>
                       <Label htmlFor="phone">Phone</Label>
                       <Input
-                        id="phone"
-                        type="tel"
-                        className="mt-1.5"
-                        value={customerInfo.phone}
-                        onChange={(e) =>
-                          setCustomerInfo({ ...customerInfo, phone: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <Label htmlFor="address">Address</Label>
-                      <Input
                         id="address"
                         className="mt-1.5"
                         value={customerInfo.address}
@@ -364,18 +478,7 @@ const Checkout = () => {
                         required
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="country">Country</Label>
-                      <Input
-                        id="country"
-                        className="mt-1.5"
-                        value={customerInfo.country}
-                        onChange={(e) =>
-                          setCustomerInfo({ ...customerInfo, country: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
+
                   </div>
                 </div>
 
@@ -394,7 +497,7 @@ const Checkout = () => {
                         Processing...
                       </>
                     ) : (
-                      <>Place Order - ${arrangeData.product.price}</>
+                      <>Place Order - ${order.productPrice}</>
                     )}
                   </Button>
                 </div>
@@ -412,21 +515,21 @@ const Checkout = () => {
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Package</span>
-                      <span className="font-medium">{arrangeData.product.name}</span>
+                      <span className="font-medium">{order.productName}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Photos</span>
-                      <span>{arrangeData.product.photos}</span>
+                      <span>{order.productPhotos}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Video</span>
                       <span>1 video</span>
                     </div>
-                    {arrangeData.title && (
+                    {order.title && (
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Title</span>
                         <span className="text-right max-w-[140px] truncate">
-                          {arrangeData.title}
+                          {order.title}
                         </span>
                       </div>
                     )}
@@ -436,7 +539,7 @@ const Checkout = () => {
                     <div className="flex justify-between items-center">
                       <span className="font-medium">Total</span>
                       <span className="text-2xl font-serif font-medium">
-                        ${arrangeData.product.price}
+                        ${order.productPrice}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
