@@ -25,7 +25,7 @@ export function CTASection() {
               asChild
               className="shadow-elevated"
             >
-              <Link to="/shop">
+              <Link to="/arrange/signature">
                 Get Started
                 <ArrowRight size={18} />
               </Link>

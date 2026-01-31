@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { name: "Home", path: "/" },
-  { name: "Shop", path: "/shop" },
 ];
 
 export function Navbar() {
@@ -51,9 +50,6 @@ export function Navbar() {
                 )}
               </Link>
             ))}
-            <Button variant="hero" size="sm" asChild>
-              <Link to="/shop">Shop Now</Link>
-            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -86,11 +82,6 @@ export function Navbar() {
                 {link.name}
               </Link>
             ))}
-            <Button variant="hero" className="w-full mt-4" asChild>
-              <Link to="/shop" onClick={() => setIsOpen(false)}>
-                Shop Now
-              </Link>
-            </Button>
           </div>
         </div>
       )}

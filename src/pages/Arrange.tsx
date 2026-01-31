@@ -32,7 +32,7 @@ const Arrange = () => {
   };
 
   if (!product) {
-    navigate("/shop");
+    navigate("/");
     return null;
   }
 
@@ -44,10 +44,10 @@ const Arrange = () => {
           <Button
             variant="ghost"
             className="mb-8"
-            onClick={() => navigate("/shop")}
+            onClick={() => navigate("/")}
           >
             <ArrowLeft size={16} />
-            Back to Shop
+            Back
           </Button>
 
           {/* Header */}

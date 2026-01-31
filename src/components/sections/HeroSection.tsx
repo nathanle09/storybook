@@ -49,13 +49,8 @@ export function HeroSection() {
           >
             <Button variant="hero" size="lg" asChild>
               <Link to="/arrange/signature">
-                Show Now
+                Create your Storybook
                 <ArrowRight size={18} />
-              </Link>
-            </Button>
-            <Button variant="hero-outline" size="lg" asChild>
-              <Link to="/#features">
-                Learn More
               </Link>
             </Button>
           </div>
