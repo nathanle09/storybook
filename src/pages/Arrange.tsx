@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Layout } from "@/components/layout/Layout";
 import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const productDetails: Record<string, { name: string; photos: string; price: number }> = {
   essential: { name: "Essential", photos: "24 photos", price: 79 },
@@ -17,18 +20,53 @@ const Arrange = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
   const product = productDetails[productId || "essential"];
+  const createOrder = useMutation(api.orders.createOrder);
 
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Store form data in session storage for checkout
-    sessionStorage.setItem("arrangeData", JSON.stringify({ ...formData, productId, product }));
-    navigate("/checkout");
+    setIsSubmitting(true);
+    
+    try {
+      const orderId = await createOrder({
+        title: formData.title,
+        subtitle: formData.subtitle,
+        message: formData.message,
+        productId: productId || "essential",
+        productName: product.name,
+        productPhotos: product.photos,
+        productPrice: product.price,
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        address: "",
+        city: "",
+        state: "",
+        zip: "",
+        country: "",
+        imageStorageIds: [],
+      });
+      
+      // Store order ID in session storage for checkout
+      sessionStorage.setItem("orderId", orderId);
+      navigate("/checkout");
+    } catch (error) {
+      console.error("Failed to create order:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create order. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!product) {
