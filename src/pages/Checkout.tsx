@@ -497,7 +497,7 @@ const Checkout = () => {
                         Processing...
                       </>
                     ) : (
-                      <>Place Order - ${order.productPrice}</>
+                      <>Place Order</>
                     )}
                   </Button>
                 </div>
@@ -514,10 +514,6 @@ const Checkout = () => {
 
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Package</span>
-                      <span className="font-medium">{order.productName}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Photos</span>
                       <span>{order.productPhotos}</span>
                     </div>
@@ -533,18 +529,6 @@ const Checkout = () => {
                         </span>
                       </div>
                     )}
-                  </div>
-
-                  <div className="border-t border-border pt-4 mb-6">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">Total</span>
-                      <span className="text-2xl font-serif font-medium">
-                        ${order.productPrice}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Including shipping
-                    </p>
                   </div>
 
                   {/* Submit Button (Desktop) */}
@@ -571,31 +555,6 @@ const Checkout = () => {
                   <p className="text-xs text-center text-muted-foreground mt-4">
                     🔒 Secure checkout powered by Storybook
                   </p>
-                </div>
-
-                {/* Upload Status */}
-                <div className="mt-4 bg-secondary/50 rounded-xl p-4">
-                  <h4 className="font-medium text-sm mb-3">Upload Status</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Photos</span>
-                      <span className={images.length >= 24 ? "text-primary" : "text-muted-foreground"}>
-                        {images.length} / {maxPhotos}
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all"
-                        style={{ width: `${(images.length / maxPhotos) * 100}%` }}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between text-sm mt-3">
-                      <span className="text-muted-foreground">Video</span>
-                      <span className={video ? "text-primary" : "text-muted-foreground"}>
-                        {video ? "1 / 1" : "0 / 1"}
-                      </span>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
