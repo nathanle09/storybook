@@ -14,6 +14,8 @@ import {
   Video,
   CheckCircle,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -91,6 +93,16 @@ const Checkout = () => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const moveImage = (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= images.length) return;
+    setImages((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -118,13 +130,19 @@ const Checkout = () => {
     try {
       // Upload images to Convex storage
       const imageStorageIds: string[] = [];
-      for (const imageFile of images) {
+      for (const [index, imageFile] of images.entries()) {
         try {
+          const paddedIndex = String(index + 1).padStart(2, "0");
+          const renamedFile = new File(
+            [imageFile],
+            `IMG_${paddedIndex}`,
+            { type: imageFile.type }
+          );
           const uploadUrl = await generateUploadUrl();
           const response = await fetch(uploadUrl, {
             method: "POST",
-            headers: { "Content-Type": imageFile.type },
-            body: imageFile,
+            headers: { "Content-Type": renamedFile.type },
+            body: renamedFile,
           });
           
           if (!response.ok) {
@@ -288,7 +306,7 @@ const Checkout = () => {
                   </div>
 
                   {images.length > 0 && (
-                    <div className="grid grid-cols-4 md:grid-cols-6 gap-3 mt-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-6">
                       {images.map((file, index) => (
                         <div
                           key={index}
@@ -299,6 +317,29 @@ const Checkout = () => {
                             alt={`Upload ${index + 1}`}
                             className="w-full h-full object-cover"
                           />
+                          <div className="absolute left-2 top-2 rounded bg-background/80 px-1.5 py-0.5 text-xs font-medium text-foreground shadow">
+                            {String(index + 1).padStart(2, "0")}
+                          </div>
+                          <div className="absolute left-2 bottom-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={() => moveImage(index, index - 1)}
+                              disabled={index === 0}
+                              className="w-6 h-6 rounded-full bg-background/90 text-foreground flex items-center justify-center disabled:opacity-40"
+                              aria-label={`Move image ${index + 1} left`}
+                            >
+                              <ChevronLeft size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => moveImage(index, index + 1)}
+                              disabled={index === images.length - 1}
+                              className="w-6 h-6 rounded-full bg-background/90 text-foreground flex items-center justify-center disabled:opacity-40"
+                              aria-label={`Move image ${index + 1} right`}
+                            >
+                              <ChevronRight size={14} />
+                            </button>
+                          </div>
                           <button
                             type="button"
                             onClick={() => removeImage(index)}
