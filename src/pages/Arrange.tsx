@@ -88,15 +88,9 @@ const Arrange = () => {
 
           {/* Header */}
           <div className="text-center mb-12">
-            <span className="text-primary text-sm font-medium tracking-wider uppercase mb-4 block">
+            <h1 className="text-primary font-serif text-3xl md:text-4xl font-medium mb-4">
               Personalize Your Storybook
-            </span>
-            <h1 className="font-serif text-3xl md:text-4xl font-medium mb-4">
-              {product.name} Package
             </h1>
-            <p className="text-muted-foreground">
-              {product.photos} • ${product.price}
-            </p>
           </div>
 
           {/* Form */}
@@ -147,20 +141,11 @@ const Arrange = () => {
               </div>
             </div>
 
-            {/* Cover Style Section */}
-            <div className="bg-secondary/50 rounded-xl p-8">
-              <div className="flex items-center justify-between mb-4">
-                <span className="font-medium">Your Selection</span>
-                <span className="text-2xl font-serif font-medium">${product.price}</span>
-              </div>
-              <p className="text-sm text-muted-foreground mb-6">
-                {product.name} Package • {product.photos} • 1 video
-              </p>
-              <Button type="submit" variant="hero" size="lg" className="w-full">
-                Continue to Checkout
-                <ArrowRight size={18} />
-              </Button>
-            </div>
+            {/* Continue to Checkout */}
+            <Button type="submit" variant="hero" size="lg" className="w-full">
+              Continue to Checkout
+              <ArrowRight size={18} />
+            </Button>
           </form>
         </div>
       </section>
