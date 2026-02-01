@@ -17,7 +17,7 @@ export const createOrder = mutation({
     city: v.string(),
     state: v.string(),
     zip: v.string(),
-    imageStorageIds: v.array(v.id("_storage")),
+    images: v.record(v.string(), v.id("_storage")),
     videoStorageId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
@@ -75,8 +75,8 @@ export const getOrdersByEmail = query({
 export const updateOrderWithFiles = mutation({
   args: {
     orderId: v.id("orders"),
-    imageStorageIds: v.array(v.string()),
-    videoStorageId: v.optional(v.string()),
+    images: v.record(v.string(), v.id("_storage")),
+    videoStorageId: v.optional(v.id("_storage")),
     firstName: v.string(),
     lastName: v.string(),
     email: v.string(),
@@ -86,9 +86,9 @@ export const updateOrderWithFiles = mutation({
     zip: v.string(),
   },
   handler: async (ctx, args) => {
-    const { orderId, imageStorageIds, videoStorageId, ...customerInfo } = args;
+    const { orderId, images, videoStorageId, ...customerInfo } = args;
     await ctx.db.patch(orderId, {
-      imageStorageIds: imageStorageIds as any,
+      images: images as any,
       videoStorageId: videoStorageId as any,
       ...customerInfo,
       updatedAt: Date.now(),

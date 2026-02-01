@@ -129,15 +129,14 @@ const Checkout = () => {
     
     try {
       // Upload images to Convex storage
-      const imageStorageIds: string[] = [];
+      const imagesMap: Record<string, string> = {};
       for (const [index, imageFile] of images.entries()) {
         try {
           const paddedIndex = String(index + 1).padStart(2, "0");
-          const renamedFile = new File(
-            [imageFile],
-            `IMG_${paddedIndex}`,
-            { type: imageFile.type }
-          );
+          const imageName = `IMG_${paddedIndex}`;
+          const renamedFile = new File([imageFile], imageName, {
+            type: imageFile.type,
+          });
           const uploadUrl = await generateUploadUrl();
           const response = await fetch(uploadUrl, {
             method: "POST",
@@ -150,7 +149,7 @@ const Checkout = () => {
           }
           
           const { storageId } = await response.json();
-          imageStorageIds.push(storageId);
+          imagesMap[imageName] = storageId;
         } catch (error) {
           console.error("Error uploading image:", error);
           toast({
@@ -207,7 +206,7 @@ const Checkout = () => {
         city: customerInfo.city,
         state: customerInfo.state,
         zip: customerInfo.zip,
-        imageStorageIds: imageStorageIds as any,
+        images: imagesMap as any,
         videoStorageId: videoStorageId as any,
       });
 

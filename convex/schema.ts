@@ -31,7 +31,7 @@ export default defineSchema({
     ),
 
     // File references (from Convex storage)
-    imageStorageIds: v.array(v.id("_storage")),
+    images: v.record(v.string(), v.id("_storage")),
     videoStorageId: v.optional(v.id("_storage")),
 
     // Timestamps
