@@ -430,8 +430,8 @@ const Checkout = () => {
                         required
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="phone">Phone</Label>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="address">Address</Label>
                       <Input
                         id="address"
                         className="mt-1.5"
