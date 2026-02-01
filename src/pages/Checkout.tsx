@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,12 +19,23 @@ import { toast } from "@/hooks/use-toast";
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const orderId = sessionStorage.getItem("orderId");
-  
-  // Fetch order from Convex
-  const order = useQuery(api.orders.getOrder, orderId ? { orderId: orderId as any } : "skip");
+  const checkoutData = useState(() => {
+    const stored = sessionStorage.getItem("checkoutData");
+    return stored ? JSON.parse(stored) : null;
+  })[0] as
+    | {
+        title: string;
+        subtitle?: string;
+        message?: string;
+        productId: string;
+        productName: string;
+        productPhotos: string;
+        productPrice: number;
+      }
+    | null;
+
+  const createOrder = useMutation(api.orders.createOrder);
   const updateOrderStatus = useMutation(api.orders.updateOrderStatus);
-  const updateOrderWithFiles = useMutation(api.orders.updateOrderWithFiles);
   const generateUploadUrl = useMutation(api.uploads.generateUploadUrl);
 
   const [images, setImages] = useState<File[]>([]);
@@ -41,24 +52,9 @@ const Checkout = () => {
     zip: "",
   });
 
-  // Update customer info from order
-  useEffect(() => {
-    if (order) {
-      setCustomerInfo({
-        firstName: order.firstName || "",
-        lastName: order.lastName || "",
-        email: order.email || "",
-        address: order.address || "",
-        city: order.city || "",
-        state: order.state || "",
-        zip: order.zip || "",
-      });
-    }
-  }, [order]);
-
-  const maxPhotos = order?.productPhotos?.includes("48")
+  const maxPhotos = checkoutData?.productPhotos?.includes("48")
     ? 48
-    : order?.productPhotos?.includes("36")
+    : checkoutData?.productPhotos?.includes("36")
     ? 36
     : 24;
 
@@ -98,10 +94,10 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!orderId || !order) {
+    if (!checkoutData) {
       toast({
         title: "Error",
-        description: "Order not found. Please start again.",
+        description: "Checkout data not found. Please start again.",
         variant: "destructive",
       });
       navigate("/");
@@ -178,11 +174,14 @@ const Checkout = () => {
         }
       }
 
-      // Update order with storage IDs and customer info
-      await updateOrderWithFiles({
-        orderId: orderId as any,
-        imageStorageIds,
-        videoStorageId,
+      const orderId = await createOrder({
+        title: checkoutData.title,
+        subtitle: checkoutData.subtitle,
+        message: checkoutData.message,
+        productId: checkoutData.productId,
+        productName: checkoutData.productName,
+        productPhotos: checkoutData.productPhotos,
+        productPrice: checkoutData.productPrice,
         firstName: customerInfo.firstName,
         lastName: customerInfo.lastName,
         email: customerInfo.email,
@@ -190,9 +189,10 @@ const Checkout = () => {
         city: customerInfo.city,
         state: customerInfo.state,
         zip: customerInfo.zip,
+        imageStorageIds: imageStorageIds as any,
+        videoStorageId: videoStorageId as any,
       });
 
-      // Update order status to processing
       await updateOrderStatus({
         orderId: orderId as any,
         status: "processing",
@@ -203,6 +203,7 @@ const Checkout = () => {
         description: "Thank you for your order. You'll receive a confirmation email shortly.",
       });
       
+      sessionStorage.removeItem("checkoutData");
       sessionStorage.removeItem("orderId");
       setIsSubmitting(false);
       navigate("/");
@@ -217,29 +218,7 @@ const Checkout = () => {
     }
   };
 
-  if (!orderId) {
-    navigate("/");
-    return null;
-  }
-
-  // Show loading state while order is being fetched
-  if (order === undefined) {
-    return (
-      <Layout>
-        <section className="section-padding">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="text-center">
-              <Loader2 size={40} className="animate-spin mx-auto mb-4" />
-              <p className="text-muted-foreground">Loading your order...</p>
-            </div>
-          </div>
-        </section>
-      </Layout>
-    );
-  }
-
-  // If order doesn't exist in the database, redirect home
-  if (order === null) {
+  if (!checkoutData) {
     navigate("/");
     return null;
   }
@@ -515,17 +494,17 @@ const Checkout = () => {
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Photos</span>
-                      <span>{order.productPhotos}</span>
+                      <span>{checkoutData.productPhotos}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Video</span>
                       <span>1 video</span>
                     </div>
-                    {order.title && (
+                    {checkoutData.title && (
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Title</span>
                         <span className="text-right max-w-[140px] truncate">
-                          {order.title}
+                          {checkoutData.title}
                         </span>
                       </div>
                     )}
