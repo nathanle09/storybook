@@ -25,42 +25,15 @@ export function Footer() {
               Preserve your family's most precious moments in beautifully crafted 
               keepsakes that tell your unique story for generations to come.
             </p>
+            <a 
+              href="mailto:storybookincubator@gmail.com" 
+              className="text-sm text-muted-foreground hover:text-primary transition-colors inline-block mt-4"
+            >
+              Email Us: storybookincubator@gmail.com
+            </a>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-serif text-lg font-medium mb-4">Explore</h4>
-            <ul className="space-y-2">
-              {[
-                { name: "Home", path: "/" },
-                { name: "Shop", path: "/shop" },
-                { name: "Our Story", path: "/" },
-              ].map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.path}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
 
-          {/* Support */}
-          <div>
-            <h4 className="font-serif text-lg font-medium mb-4">Support</h4>
-            <ul className="space-y-2">
-              {["Contact Us", "FAQ", "Shipping"].map((item) => (
-                <li key={item}>
-                  <span className="text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer">
-                    {item}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
 
         {/* Bottom Bar */}
