@@ -20,8 +20,6 @@ const Arrange = () => {
 
   const [formData, setFormData] = useState({
     title: "",
-    subtitle: "",
-    message: "",
   });
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,8 +27,6 @@ const Arrange = () => {
       "checkoutData",
       JSON.stringify({
         title: formData.title,
-        subtitle: formData.subtitle,
-        message: formData.message,
         productId: productId || "essential",
         productName: product.name,
         productPhotos: product.photos,
@@ -87,28 +83,6 @@ const Arrange = () => {
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="subtitle" className="text-base">Subtitle (Optional)</Label>
-                  <Input
-                    id="subtitle"
-                    placeholder="e.g., 1950 - Present"
-                    className="mt-2"
-                    value={formData.subtitle}
-                    onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="message" className="text-base">Personal Message</Label>
-                  <Textarea
-                    id="message"
-                    placeholder="Write a heartfelt message that will appear on the first page of your storybook..."
-                    className="mt-2 min-h-[120px] resize-none"
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   />
                 </div>
               </div>

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -21,14 +21,12 @@ import { toast } from "@/hooks/use-toast";
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const checkoutData = useState(() => {
+  const checkoutData = useMemo(() => {
     const stored = sessionStorage.getItem("checkoutData");
     return stored ? JSON.parse(stored) : null;
-  })[0] as
+  }, []) as
     | {
         title: string;
-        subtitle?: string;
-        message?: string;
         productId: string;
         productName: string;
         productPhotos: string;
@@ -193,8 +191,6 @@ const Checkout = () => {
 
       const orderId = await createOrder({
         title: checkoutData.title,
-        subtitle: checkoutData.subtitle,
-        message: checkoutData.message,
         productId: checkoutData.productId,
         productName: checkoutData.productName,
         productPhotos: checkoutData.productPhotos,

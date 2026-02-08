@@ -4,8 +4,6 @@ import { v } from "convex/values";
 export const createOrder = mutation({
   args: {
     title: v.string(),
-    subtitle: v.optional(v.string()),
-    message: v.optional(v.string()),
     productId: v.string(),
     productName: v.string(),
     productPhotos: v.string(),
