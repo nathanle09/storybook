@@ -149,10 +149,11 @@ const Checkout = () => {
           const { storageId } = await response.json();
           imagesMap[imageName] = storageId;
         } catch (error) {
-          console.error("Error uploading image:", error);
+          console.error(`Error uploading image ${index + 1}:`, error);
+          console.error("Image details:", { name: imageFile.name, type: imageFile.type, size: imageFile.size });
           toast({
             title: "Error uploading image",
-            description: `Failed to upload image. Please try again.`,
+            description: `Failed to upload image ${index + 1}. Please try again.`,
             variant: "destructive",
           });
           setIsSubmitting(false);
@@ -179,6 +180,7 @@ const Checkout = () => {
           videoStorageId = storageId;
         } catch (error) {
           console.error("Error uploading video:", error);
+          console.error("Video details:", { name: video.name, type: video.type, size: video.size });
           toast({
             title: "Error uploading video",
             description: "Failed to upload video. Please try again.",
@@ -188,6 +190,8 @@ const Checkout = () => {
           return;
         }
       }
+
+      console.log("Uploading complete. Images:", Object.keys(imagesMap).length, "Video:", !!videoStorageId);
 
       const orderId = await createOrder({
         title: checkoutData.title,
@@ -222,6 +226,7 @@ const Checkout = () => {
       navigate("/");
     } catch (error) {
       console.error("Failed to process order:", error);
+      console.error("Order payload:", { checkoutData, customerInfo, imageCount: images.length, hasVideo: !!video });
       toast({
         title: "Error",
         description: "Failed to process order. Please try again.",
