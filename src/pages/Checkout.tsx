@@ -41,6 +41,8 @@ const Checkout = () => {
   const [images, setImages] = useState<File[]>([]);
   const [video, setVideo] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dropTarget, setDropTarget] = useState<{ index: number; side: "left" | "right" } | null>(null);
 
   const [customerInfo, setCustomerInfo] = useState({
     firstName: "",
@@ -52,11 +54,7 @@ const Checkout = () => {
     zip: "",
   });
 
-  const maxPhotos = checkoutData?.productPhotos?.includes("48")
-    ? 48
-    : checkoutData?.productPhotos?.includes("36")
-    ? 36
-    : 24;
+  const maxPhotos = 48;
 
   const handleImageUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,6 +97,46 @@ const Checkout = () => {
       next.splice(toIndex, 0, moved);
       return next;
     });
+  };
+
+  const handleDragStart = (index: number) => {
+    setDragIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (dragIndex === null) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const midpoint = rect.left + rect.width / 2;
+    const side = e.clientX < midpoint ? "left" : "right";
+    setDropTarget({ index, side });
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (dragIndex === null || !dropTarget) {
+      setDragIndex(null);
+      setDropTarget(null);
+      return;
+    }
+    const insertAt = dropTarget.side === "right" ? dropTarget.index + 1 : dropTarget.index;
+    // Adjust for removal shifting indices
+    const adjustedInsert = dragIndex < insertAt ? insertAt - 1 : insertAt;
+    if (adjustedInsert !== dragIndex) {
+      setImages((prev) => {
+        const next = [...prev];
+        const [moved] = next.splice(dragIndex, 1);
+        next.splice(adjustedInsert, 0, moved);
+        return next;
+      });
+    }
+    setDragIndex(null);
+    setDropTarget(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragIndex(null);
+    setDropTarget(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -306,16 +344,34 @@ const Checkout = () => {
                   </div>
 
                   {images.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-6">
+                    <div
+                      className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-6"
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={handleDrop}
+                    >
                       {images.map((file, index) => (
                         <div
                           key={index}
-                          className="relative aspect-square rounded-lg overflow-hidden bg-muted group"
+                          draggable
+                          onDragStart={() => handleDragStart(index)}
+                          onDragOver={(e) => handleDragOver(e, index)}
+                          onDragEnd={handleDragEnd}
+                          className={`relative aspect-square rounded-lg overflow-hidden bg-muted group cursor-grab active:cursor-grabbing transition-all duration-200 ${
+                            dragIndex === index ? "opacity-40 scale-95" : ""
+                          } ${
+                            dropTarget?.index === index && dropTarget.side === "left"
+                              ? "border-l-4 border-l-orange-500"
+                              : ""
+                          } ${
+                            dropTarget?.index === index && dropTarget.side === "right"
+                              ? "border-r-4 border-r-orange-500"
+                              : ""
+                          }`}
                         >
                           <img
                             src={URL.createObjectURL(file)}
                             alt={`Upload ${index + 1}`}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover pointer-events-none"
                           />
                           <div className="absolute left-2 top-2 rounded bg-background/80 px-1.5 py-0.5 text-xs font-medium text-foreground shadow">
                             {String(index + 1).padStart(2, "0")}
