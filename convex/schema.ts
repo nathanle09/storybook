@@ -5,8 +5,6 @@ export default defineSchema({
   orders: defineTable({
     // Arrangement data
     title: v.string(),
-    subtitle: v.optional(v.string()),
-    message: v.optional(v.string()),
     productId: v.string(),
     productName: v.string(),
     productPhotos: v.string(),
