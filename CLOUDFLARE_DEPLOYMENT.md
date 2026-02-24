@@ -65,7 +65,7 @@ Or deploy only the frontend:
 
 ```powershell
 npm run build
-wrangler pages deploy dist
+npx wrangler pages deploy dist
 ```
 
 ## Environment Variables
