@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Arrange from "./pages/Arrange";
 import Checkout from "./pages/Checkout";
 import About from "./pages/About";
+import HowItWorks from "./pages/HowItWorks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/arrange/:productId" element={<Arrange />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/about" element={<About />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
